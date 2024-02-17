@@ -5,10 +5,12 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from types import SimpleNamespace
+import requests as rq
 
 from app.colored_log import Log
 from time import sleep
 class YoutubeScrapper:
+    api_url="http://127.0.0.1:8000/api/"
     channel_name: str = ""
     driver: webdriver.Chrome = None
     options: webdriver.ChromeOptions = None
@@ -77,7 +79,7 @@ class YoutubeScrapper:
     def remove_element(self, element):
         try:
             self.driver.execute_script("arguments[0].remove();", element)
-            Log.success("Element is removed")
+            #Log.success("Element is removed")
         except:
             Log.error("Element is not removed")
     
@@ -91,7 +93,13 @@ class YoutubeScrapper:
                 try:
                     link=video.get_attribute('href')
                     title=video.get_attribute('title')
-                    Log.success(f"{title} - {link}")
+                    #Log.success(f"{title} - {link}")
+                    insert_request=rq.post(self.api_url+"save-video/", data={"url":link, "title":title})
+                    if insert_request.status_code==200:
+                        Log.success(f"{title} - {link} is saved to database")
+                    else:
+                        error = insert_request.json()
+                        Log.error(f"{title} - {link} is not saved to database: {error}")
                 except:
                     Log.error("Video link is not found")
                 self.remove_element(video)
