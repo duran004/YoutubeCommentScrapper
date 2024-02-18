@@ -20,4 +20,16 @@ class VideosController extends Controller
             return response()->json(['message' => 'Error saving video', 'error' => $e->getMessage()]);
         }
     }
+
+    public function get_video(){
+        try{
+            $video = Video::orderBy('checked', 'asc')->first();
+            $video->increment('checked');
+            $video->checked_at = now();
+            $video->save();
+            return response()->json($video);    
+        }catch(\Exception $e){
+            return response()->json(['message' => 'Error getting video', 'error' => $e->getMessage()]);
+        }
+    }
 }
